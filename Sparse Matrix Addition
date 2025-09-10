@@ -1,0 +1,179 @@
+#include <stdio.h>
+
+int Tuple(int matrix[10][10], int rows, int cols, int tuple[50][3])
+{
+    int k = 1;
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < cols; j++)
+        {
+            if (matrix[i][j] != 0)
+            {
+                tuple[k][0] = i;
+                tuple[k][1] = j;
+                tuple[k][2] = matrix[i][j];
+                k++;
+            }
+        }
+    }
+    tuple[0][0] = rows;
+    tuple[0][1] = cols;
+    tuple[0][2] = k - 1;
+    return k;
+}
+
+void print(int tuple[50][3])
+{
+    int n = tuple[0][2];
+    for (int i = 0; i <= n; i++)
+    {
+        printf("%d\t%d\t%d\n", tuple[i][0], tuple[i][1], tuple[i][2]);
+    }
+}
+
+
+void add(int t1[50][3], int t2[50][3], int sum[50][3])
+{
+    int i = 1, j = 1, k = 1;
+
+    if (t1[0][0] != t2[0][0] || t1[0][1] != t2[0][1])
+    {
+        printf("Addition not possible.\n");
+        return;
+    }
+
+    sum[0][0] = t1[0][0];
+    sum[0][1] = t1[0][1];
+
+    while (i <= t1[0][2] && j <= t2[0][2])
+    {
+        if (t1[i][0] < t2[j][0] || (t1[i][0] == t2[j][0] && t1[i][1] < t2[j][1]))
+        {
+            sum[k][0] = t1[i][0];
+            sum[k][1] = t1[i][1];
+            sum[k][2] = t1[i][2];
+            i++;
+        } else if (t2[j][0] < t1[i][0] || (t2[j][0] == t1[i][0] && t2[j][1] < t1[i][1]))
+        {
+            sum[k][0] = t2[j][0];
+            sum[k][1] = t2[j][1];
+            sum[k][2] = t2[j][2];
+            j++;
+        } else {
+            sum[k][0] = t1[i][0];
+            sum[k][1] = t1[i][1];
+            sum[k][2] = t1[i][2] + t2[j][2];
+            i++;
+            j++;
+        }
+        k++;
+    }
+
+    while (i <= t1[0][2])
+    {
+        sum[k][0] = t1[i][0];
+        sum[k][1] = t1[i][1];
+        sum[k][2] = t1[i][2];
+        i++;
+        k++;
+    }
+
+    while (j <= t2[0][2])
+    {
+        sum[k][0] = t2[j][0];
+        sum[k][1] = t2[j][1];
+        sum[k][2] = t2[j][2];
+        j++;
+        k++;
+    }
+
+    sum[0][2] = k - 1;
+}
+
+
+void transpose(int tuple[50][3], int trans[50][3])
+{
+    int nonZero = tuple[0][2];
+
+
+    for (int i = 1; i <= nonZero; i++)
+    {
+        trans[i][0] = tuple[i][1]; 
+        trans[i][1] = tuple[i][0];
+        trans[i][2] = tuple[i][2];
+    }
+
+    
+    trans[0][0] = tuple[0][1];
+    trans[0][1] = tuple[0][0];
+    trans[0][2] = nonZero;
+
+    
+    for (int i = 1; i < nonZero; i++)
+    {
+        for (int j = i + 1; j <= nonZero; j++)
+        {
+            if (trans[i][0] > trans[j][0] || (trans[i][0] == trans[j][0] && trans[i][1] > trans[j][1]))
+            {
+                
+                int temp0 = trans[i][0];
+                int temp1 = trans[i][1];
+                int temp2 = trans[i][2];
+                trans[i][0] = trans[j][0];
+                trans[i][1] = trans[j][1];
+                trans[i][2] = trans[j][2];
+                trans[j][0] = temp0;
+                trans[j][1] = temp1;
+                trans[j][2] = temp2;
+            }
+        }
+    }
+}
+
+
+int main()
+{
+    int m1[10][10], m2[10][10];
+    int tupleM1[50][3], tupleM2[50][3], sumTuple[50][3], transTuple[50][3];
+    int rows, cols;
+
+    printf("Enter number of rows and columns (max 10): ");
+    scanf("%d%d", &rows, &cols);
+
+    printf("\nEnter Matrix M1:\n");
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < cols; j++)
+        {
+            scanf("%d", &m1[i][j]);
+        }
+    }
+
+    printf("\nEnter Matrix M2:\n");
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < cols; j++)
+        {
+            scanf("%d", &m2[i][j]);
+        }
+    }
+
+    Tuple(m1, rows, cols, tupleM1);
+    Tuple(m2, rows, cols, tupleM2);
+
+    printf("\nTuple Representation of Matrix M1:\n");
+    print(tupleM1);
+
+    printf("\nTuple Representation of Matrix M2:\n");
+    print(tupleM2);
+
+    add(tupleM1, tupleM2, sumTuple);
+    printf("\nSum of M1 and M2 in Tuple Format:\n");
+    print(sumTuple);
+
+    transpose(sumTuple, transTuple);
+    printf("\nTranspose of the Sum Matrix in Tuple Format:\n");
+    print(transTuple);
+
+    return 0;
+}
