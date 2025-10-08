@@ -1,0 +1,103 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define URL_SIZE 100
+
+typedef struct Node {
+    char url[100];
+    struct Node* prev;
+    struct Node* next;
+} Node;
+
+Node* head = NULL;
+Node* current = NULL;
+
+void visit(char* url) {
+    Node* newNode = (Node*) malloc(sizeof(Node));
+    strcpy(newNode->url, url);
+    newNode->next = NULL;
+
+    if (head == NULL) {
+        head = newNode;
+        newNode->prev = NULL;
+    } else {
+        Node* temp = head;
+        while (temp->next != NULL) {
+            temp = temp->next;
+        }
+        temp->next = newNode;
+        newNode->prev = temp;
+    }
+
+    current = newNode;
+}
+
+void back() {
+    if (current != NULL && current->prev != NULL) {
+        current = current->prev;
+        printf("Back: %s\n", current->url);
+    } else {
+        printf("Cannot go back\n");
+    }
+}
+
+void forward() {
+    if (current != NULL && current->next != NULL) {
+        current = current->next;
+        printf("Forward: %s\n", current->url);
+    } else {
+        printf("Cannot go forward\n");
+    }
+}
+
+void now(){
+    if(current==NULL)
+    {
+        printf("no page yet");
+    }
+    else{
+        printf("current : %s",current->url);
+    }
+}
+
+int main() {
+int choice;
+char url[URL_SIZE];
+
+printf("\n=== Browser Menu ===\n");
+printf("1. Visit Page\n");
+printf("2. Back\n");
+printf("3. Forward\n");
+printf("4. Show Current Page\n");
+printf("5. Exit\n");
+
+
+while (1) {
+printf("\nEnter choice: ");
+scanf("%d", &choice);
+
+switch (choice) {
+case 1:
+printf("Enter URL: ");
+scanf("%s", url);
+visit(url);
+break;
+case 2:
+back();
+break;
+case 3:
+forward();
+break;
+case 4:
+now();
+break;
+case 5:
+printf("Exited");
+exit(0);
+default:
+printf("Invalid choice! Try again.\n");
+}
+}
+    return 0;
+}
