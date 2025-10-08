@@ -1,0 +1,172 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
+#define MAX 100
+
+typedef struct Node {
+    char data;
+    struct Node *left, *right;
+} Node;
+
+typedef struct {
+    Node* items[MAX];
+    int top;
+} NodeStack;
+
+typedef struct {
+    char items[MAX];
+    int top;
+} CharStack;
+
+int precedence(char op);
+int isOperator(char ch);
+void infixToPostfix(const char* infix, char* postfix);
+Node* createNode(char data);
+void pushNode(NodeStack *s, Node* node);
+Node* popNode(NodeStack *s);
+void pushChar(CharStack *s, char ch);
+char popChar(CharStack *s);
+char peekChar(CharStack *s);
+int isEmptyChar(CharStack *s);
+void printInfix(Node* root);
+void printPrefix(Node* root);
+void printPostfix(Node* root);
+Node* buildExpressionTree(char* postfix);
+
+int main() {
+    char infix[MAX], postfix[MAX];
+
+    printf("Enter an infix expression: ");
+    scanf("%s", infix);
+
+    infixToPostfix(infix, postfix);
+    printf("Postfix expression: %s\n", postfix);
+
+    Node* root = buildExpressionTree(postfix);
+
+    printf("Prefix expression: ");
+    printPrefix(root);
+Inorder Traversal: 2 4 7 
+    printf("\n");
+
+    return 0;
+}
+
+int precedence(char op) {
+    if (op == '+' || op == '-') return 1;
+    if (op == '*' || op == '/') return 2;
+    return 0;
+}
+
+int isOperator(char ch) {
+    return ch == '+' || ch == '-' || ch == '*' || ch == '/';
+}
+
+void infixToPostfix(const char* infix, char* postfix) {
+    CharStack stack;
+    stack.top = -1;
+    int k = 0;
+
+    for (int i = 0; infix[i]; i++) {
+        char ch = infix[i];
+
+        if (isalnum(ch)) {
+            postfix[k++] = ch;
+        } else if (ch == '(') {
+            pushChar(&stack, ch);
+        } else if (ch == ')') {
+            while (!isEmptyChar(&stack) && peekChar(&stack) != '(') {
+                postfix[k++] = popChar(&stack);
+            }
+            if (!isEmptyChar(&stack)) popChar(&stack); 
+        } else if (isOperator(ch)) {
+            while (!isEmptyChar(&stack) && precedence(peekChar(&stack)) >= precedence(ch)) {
+                postfix[k++] = popChar(&stack);
+            }
+            pushChar(&stack, ch);
+        }
+    }
+
+    while (!isEmptyChar(&stack)) {
+        postfix[k++] = popChar(&stack);
+    }
+    postfix[k] = '\0';
+}
+
+void pushChar(CharStack *s, char ch) {
+    s->items[++(s->top)] = ch;
+}
+
+char popChar(CharStack *s) {
+    return s->items[(s->top)--];
+}
+
+char peekChar(CharStack *s) {
+    return s->items[s->top];
+}
+
+int isEmptyChar(CharStack *s) {
+    return s->top == -1;
+}
+
+void pushNode(NodeStack *s, Node* node) {
+    s->items[++(s->top)] = node;
+}
+
+Node* popNode(NodeStack *s) {
+    return s->items[(s->top)--];
+}
+
+Node* createNode(char data) {
+    Node* node = (Node*)malloc(sizeof(Node));
+    node->data = data;
+    node->left = node->right = NULL;
+    return node;
+}
+
+Node* buildExpressionTree(char* postfix) {
+    NodeStack stack;
+    stack.top = -1;
+
+    for (int i = 0; postfix[i]; i++) {
+        char ch = postfix[i];
+        Node* node = createNode(ch);
+
+        if (isOperator(ch)) {
+            node->right = popNode(&stack);
+            node->left = popNode(&stack);
+        }
+
+        pushNode(&stack, node);
+    }
+
+    Node* root = popNode(&stack);
+    return root;
+}
+
+void printPrefix(Node* root) {
+    if (root) {
+        printf("%c", root->data);
+        printPrefix(root->left);
+        printPrefix(root->right);
+    }
+}
+
+void printPostfix(Node* root) {
+    if (root) {
+        printPostfix(root->left);
+        printPostfix(root->right);
+        printf("%c", root->data);
+    }
+}
+
+void printInfix(Node* root) {
+    if (root) {
+        if (isOperator(root->data)) printf("(");
+        printInfix(root->left);
+        printf("%c", root->data);
+        printInfix(root->right);
+        if (isOperator(root->data)) printf(")");
+    }
+}
